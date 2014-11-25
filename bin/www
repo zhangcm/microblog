@@ -1,9 +1,24 @@
 #!/usr/bin/env node
 var debug = require('debug')('microblog');
 var app = require('../app');
+var settings = require('../settings');
+var MongoClient = require('mongodb').MongoClient, assert = require('assert');
 
 app.set('port', process.env.PORT || 3000);
 
-var server = app.listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
+// 参考官方实现
+MongoClient.connect(settings.url, function(err, database) {
+    assert.equal(null, err);
+    debug("Connected correctly to mongodb");
+    // 由于db是在回调函数中赋值，不知道如何module.exports，
+    // 所以在启动前初始化好，并赋给一个全局变量，供其他模块使用
+    // 全局变量会导致可读性变差，以后思考去除
+    global.db = database;
+    var server = app.listen(app.get('port'), function() {
+  		debug('Express server listening on port ' + server.address().port);
+  	});
 });
+
+
+
+

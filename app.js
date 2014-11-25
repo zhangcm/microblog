@@ -4,11 +4,18 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
+var partials = require('express-partials');
+var flash = require('connect-flash');
+// connect-mongo config
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+// db config
+var settings = require('./settings');
+// route
 var routes = require('./routes/index');
 var users = require('./routes/users');
 
-var partials = require('express-partials');
+var debug = require('debug')('microblog');
 
 var app = express();
 
@@ -23,10 +30,43 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(flash());
+
+// connect-mongo config
+app.use(session({
+    cookie: { maxAge: 60000},
+    secret: settings.cookie_secret,
+    store: new MongoStore({
+        db: settings.db
+    })
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
+// app.dynamicHelpers
+app.use(function(req, res, next) {
+    res.locals.user = req.session.user;
+
+    var err = req.flash('error');
+
+    if (err.length) {
+        res.locals.err = err;
+    } else {
+        res.locals.err = null;
+    } 
+
+    var succ = req.flash('success');
+    if (succ.length) {
+        res.locals.succ = succ;
+    } else {
+        res.locals.succ = null;
+    }
+    next();
+});
+
 app.use('/', routes);
-app.use('/users', users);
+app.use('/user', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

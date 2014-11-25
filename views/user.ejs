@@ -1,15 +1,7 @@
-<% if (!locals.user) { %>
-<div class="jumbotron">
-  <h1>欢迎来到 Microblog</h1>
-  <p>Microblog 是一个基于 Node.js 的微博系统。</p> 
-  <p>
-    <a class="btn btn-primary btn-large" href="/login">登录</a>
-    <a class="btn btn-default btn-large" href="/reg">立即注册</a> 
-  </p>
-</div>
-<% } else { %>
-  <%- partial('say') %>
-<% }%>
+<% if (user) { %>
+<%- partial('say') %>
+<% } %>
+
 <% posts.forEach(function(post, index) {
 	if (index % 3 == 0) { %>
 	<div class="row">
@@ -25,4 +17,4 @@
 <% }); %>
 <% if (posts.length % 3 != 0) { %>
 	</div><!-- end row -->
-<% } %>
+<% } %> 

@@ -1,0 +1,1 @@
+DEBUG=microblog ./bin/www
